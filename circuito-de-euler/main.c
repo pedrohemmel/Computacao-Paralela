@@ -13,38 +13,50 @@ int calculateEulerWay(int edges[7][4], WayState  way[], int nEdges) {
 
     int y = 0;
     int x = 0;
-    
-   // #pragma omp parallel shared(way)
+
     WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
     way[0] = wayState;
-   //#pragma omp for
-    for(int iEdge = 1; iEdge < nEdges; iEdge++) {
-        y = edges[i][j];
-        x = 0;
-        for(int index = 0; index < 4; index++) {
-            if(edges[y][index] == y) {
-                x = index;
+    
+    #pragma omp parallel shared(way)
+    #pragma omp for
+        for(int iEdge = 1; iEdge < nEdges; iEdge++) {
+            y = edges[i][j];
+            x = 0;
+            for(int index = 0; index < 4; index++) {
+                if(edges[y][index] == i) {
+                    x = index;
+                }
+            }
+            
+            if(edges[y][x + 1] == -1) {
+                if(y + 1 < 7) {
+                    i = y + 1;
+                    j = 0;
+
+                    WayState newWayState = {.weight = 0, .i = i, .j = edges[i][j]};
+                    way[iEdge] = newWayState;
+                } else {
+                    i = y;
+                    j = x;
+                    WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
+                    way[iEdge] = wayState;
+                }
+            } else if(x >= 3) {
+                i = y;
+                j = x;
+                WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
+                way[iEdge] = wayState;
+            } else {
+                i = y;
+                j = x + 1;
+
+                WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
+                
+                way[iEdge] = wayState;
             }
         }
-        
-        if(x >= 3) {
-            i = y;
-            j = x;
-            printf("%d", edges[i][j]);
-            WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
-            way[i] = wayState;
-        } else {
-            i = y;
-            
-            x = x + 1;
-            j = x;
 
-            printf("%d", edges[i][j]);
-            WayState wayState = {.weight = 0, .i = i, .j = edges[i][j]};
-            
-            way[i] = wayState;
-        }
-    }
+    return 0;
 }
 
 
